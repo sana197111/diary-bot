@@ -25,54 +25,66 @@ st.markdown("""
     background-color: #abc1d1;
     border-radius: 1rem;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: calc(100vh - 2rem);
+}
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 .chat-message {
     padding: 0.8rem;
     border-radius: 1rem;
     margin-bottom: 1rem;
-    display: flex;
     max-width: 70%;
+    word-wrap: break-word;
 }
 .chat-message.user {
     background-color: #FEE500;
     color: black;
     border-top-right-radius: 0.3rem;
-    justify-content: flex-end;
-    margin-left: auto;
+    align-self: flex-end;
 }
 .chat-message.assistant {
     background-color: white;
     color: black;
     border-top-left-radius: 0.3rem;
-    justify-content: flex-start;
-    margin-right: auto;
-}
-.chat-header {
+    align-self: flex-start;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    margin-bottom: 0.5rem;
 }
-.chat-icon {
+.chat-message.assistant img {
     width: 30px;
     height: 30px;
     border-radius: 50%;
     margin-right: 0.5rem;
 }
-.chat-title {
-    font-size: 1rem;
-    font-weight: bold;
-}
-.chat-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 1rem;
+.chat-input {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
     background-color: white;
-    text-align: center;
-    font-size: 0.8rem;
-    color: #999;
+    border-radius: 0.5rem;
+}
+.chat-input input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    padding: 0.5rem;
+    font-size: 1rem;
+}
+.chat-input button {
+    background-color: #FEE500;
+    color: black;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    margin-left: 0.5rem;
+    cursor: pointer;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -85,25 +97,27 @@ if "messages" not in st.session_state:
 chat_container = st.empty()
 
 with chat_container.container():
-    # 채팅 헤더
-    st.markdown('<div class="chat-header"><img src="https://i.imgur.com/YMdJE5g.png" alt="오아시스 챗봇 아이콘" class="chat-icon"/><span class="chat-title">오아시스 챗봇</span></div>', unsafe_allow_html=True)
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     
-    # 채팅 기록 표시
+    # 채팅 메시지 영역
+    st.markdown('<div class="chat-messages">', unsafe_allow_html=True)
     for message in st.session_state.messages:
         if message["role"] == "assistant":
-            st.markdown(f'<div class="chat-message assistant">{message["content"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="chat-message assistant"><img src="https://i.imgur.com/YMdJE5g.png" alt="오아시스 챗봇 아이콘"/>{message["content"]}</div>', unsafe_allow_html=True)
         else:
             st.markdown(f'<div class="chat-message user">{message["content"]}</div>', unsafe_allow_html=True)
-
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     # 초기 대화 메시지
     if not st.session_state.messages:
-        st.session_state.messages.append({"role": "assistant", "content": "안녕하세요! 당신의 이름이 무엇인가요?"})
-        st.markdown('<div class="chat-message assistant">안녕하세요! 당신의 이름이 무엇인가요?</div>', unsafe_allow_html=True)
+        initial_message = {"role": "assistant", "content": "안녕하세요! 당신의 이름이 무엇인가요?"}
+        st.session_state.messages.append(initial_message)
+        st.markdown(f'<div class="chat-message assistant"><img src="https://i.imgur.com/YMdJE5g.png" alt="오아시스 챗봇 아이콘"/>{initial_message["content"]}</div>', unsafe_allow_html=True)
 
-    # 사용자 입력 받기
+    # 사용자 입력 영역
+    st.markdown('<div class="chat-input">', unsafe_allow_html=True)
     prompt = st.text_input("메시지 입력", key='input', max_chars=None)
-
-    if prompt:
+    if st.button("전송") or prompt:
         # 사용자 메시지 표시
         st.markdown(f'<div class="chat-message user">{prompt}</div>', unsafe_allow_html=True)
         
@@ -138,10 +152,10 @@ with chat_container.container():
         
         # 1초 기다렸다가 어시스턴트 응답 표시
         time.sleep(1)
-        st.markdown(f'<div class="chat-message assistant">{response}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="chat-message assistant"><img src="https://i.imgur.com/YMdJE5g.png" alt="오아시스 챗봇 아이콘"/>{response}</div>', unsafe_allow_html=True)
         
         # 어시스턴트 응답을 채팅 기록에 추가
         st.session_state.messages.append({"role": "assistant", "content": response})
-
-    # 채팅창 하단 고정
-    st.markdown('<div class="chat-footer">오아시스 일기 작성 챗봇</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
